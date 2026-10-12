@@ -41,7 +41,7 @@ const devProjects = { jc: null, lky: null, yp: null };
 async function loadDevProjects() {
   const tasks = ['jc', 'lky', 'yp'].map(async (dev) => {
     try {
-      const res = await fetch(`/dev-${dev}`);
+      const res = await fetch(`dev-${dev}.csv`);
       const text = await res.text();
       const ids = new Set();
       const lines = text.split('\n');

@@ -25,18 +25,6 @@ const PUBLIC_DIR = path.join(__dirname, 'public');
 
 function serveStatic(req, res) {
   const urlPath = decodeURIComponent(req.url.split('?')[0]);
-
-  // 开发者 CSV 从项目根目录提供
-  if (urlPath.startsWith('/dev-')) {
-    const devFile = path.join(__dirname, '项目详情-' + urlPath.slice(5) + '.csv');
-    fs.readFile(devFile, (err, buf) => {
-      if (err) { res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' }); res.end('Not Found'); return; }
-      res.writeHead(200, { 'Content-Type': MIME['.csv'] });
-      res.end(buf);
-    });
-    return;
-  }
-
   const filePath = path.join(PUBLIC_DIR, urlPath === '/' ? 'index.html' : urlPath);
   if (!filePath.startsWith(PUBLIC_DIR)) {
     res.writeHead(403);
