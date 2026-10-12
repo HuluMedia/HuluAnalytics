@@ -356,7 +356,7 @@ function query() {
     });
   }
 
-  currentRows = rows.filter((r) => r.number !== 0); // 去掉值为 0 的项,不参与排序
+  currentRows = rows; // 值为 0 的项也保留,参与排序
   render();
 }
 
