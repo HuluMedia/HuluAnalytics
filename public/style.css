@@ -155,9 +155,23 @@ select option { background: var(--card); }
 .result-table tbody tr:last-child td { border-bottom: none; }
 
 .col-rank { width: 64px; }
+.col-dev { width: 96px; }
 .col-value { width: 160px; text-align: right !important; }
 td.cell-value { text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; }
 td.cell-value .muted { color: var(--text-dim); font-weight: 400; }
+
+.dev-tag {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  background: rgba(51, 112, 255, 0.15);
+  color: #6ea0ff;
+}
+.dev-tag.dev-jc { background: rgba(245, 181, 68, 0.15); color: #f5b544; }
+.dev-tag.dev-lky { background: rgba(51, 112, 255, 0.15); color: #6ea0ff; }
+.dev-tag.dev-yp { background: rgba(92, 201, 154, 0.15); color: #5cc99a; }
 
 .sortable { cursor: pointer; user-select: none; }
 .sortable:hover { color: var(--text); }

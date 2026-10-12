@@ -309,10 +309,16 @@ function query() {
     }
     if (matchRow === -1) continue;
     const raw = s.rows[matchRow]?.[colIdx] ?? null;
+    // 匹配所属开发者
+    let dev = '';
+    for (const d of ['jc', 'lky', 'yp']) {
+      if (devProjects[d]?.has(s.name)) { dev = d; break; }
+    }
     rows.push({
       table: s.name,
       value: raw === null || raw === '' ? null : raw,
       number: extractNumber(raw),
+      dev: dev,
     });
   }
 
@@ -346,7 +352,10 @@ function render() {
       const cell = r.value === null || r.value === ''
         ? '<span class="muted">-</span>'
         : escapeHtml(formatValue(r.value));
-      return `<tr><td>${rank}</td><td>${escapeHtml(r.table)}</td><td class="cell-value">${cell}</td></tr>`;
+      const devCell = r.dev
+        ? `<span class="dev-tag dev-${escapeHtml(r.dev)}">${escapeHtml(r.dev)}</span>`
+        : '<span class="muted">-</span>';
+      return `<tr><td>${rank}</td><td>${escapeHtml(r.table)}</td><td>${devCell}</td><td class="cell-value">${cell}</td></tr>`;
     })
     .join('');
 
