@@ -39,20 +39,17 @@ let originalWorkbook = null; // 保留 workbook 用于公式转换
 const devProjects = { jc: null, lky: null, yp: null };
 
 async function loadDevProjects() {
-  const tasks = ['jc', 'lky', 'yp'].map(async (dev) => {
-    try {
-      const res = await fetch(`dev-${dev}.csv`);
-      const text = await res.text();
-      const ids = new Set();
-      const lines = text.split('\n');
-      for (let i = 1; i < lines.length; i++) { // 跳过表头
-        const id = lines[i].split(',')[0]?.trim();
-        if (id) ids.add(id);
-      }
-      devProjects[dev] = ids;
-    } catch (e) { devProjects[dev] = new Set(); }
-  });
-  await Promise.all(tasks);
+  try {
+    const res = await fetch('dev.json');
+    const data = await res.json();
+    for (const dev of ['jc', 'lky', 'yp']) {
+      devProjects[dev] = new Set(Array.isArray(data[dev]) ? data[dev] : []);
+    }
+  } catch (e) {
+    for (const dev of ['jc', 'lky', 'yp']) {
+      devProjects[dev] = new Set();
+    }
+  }
 }
 loadDevProjects();
 
