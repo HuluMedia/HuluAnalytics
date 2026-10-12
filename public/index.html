@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>运营数据分析</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="header">
+    <h1>运营数据分析</h1>
+    <p class="subtitle">上传飞书导出的表格文件,所有解析、查询、排序均在本地完成</p>
+  </header>
+
+  <main class="container">
+    <section class="card">
+      <div id="dropZone" class="dropzone">
+        <input type="file" id="fileInput" accept=".xlsx,.xls" hidden />
+        <svg class="dz-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 16V4"/><path d="m6 10 6-6 6 6"/><path d="M4 20h16"/>
+        </svg>
+        <div class="dz-text">点击选择或拖拽文件到此处</div>
+        <div class="dz-hint">支持 .xlsx(飞书电子表格右上角「导出」下载,包含全部工作表)</div>
+      </div>
+      <div id="fileInfo" class="file-info hidden"></div>
+    </section>
+
+    <div id="message" class="message hidden"></div>
+
+    <section id="analysisCard" class="card hidden">
+      <div class="controls">
+        <div class="field">
+          <label for="dateInput">日期</label>
+          <input type="date" id="dateInput" />
+        </div>
+        <div class="field">
+          <label for="devSelect">开发者</label>
+          <select id="devSelect">
+            <option value="all">全部</option>
+            <option value="jc">jc</option>
+            <option value="lky">lky</option>
+            <option value="yp">yp</option>
+          </select>
+        </div>
+        <div class="field grow">
+          <label for="columnSelect">列名</label>
+          <select id="columnSelect">
+            <option value="">请选择列名</option>
+          </select>
+        </div>
+        <button id="queryBtn" class="btn-primary">查 询</button>
+      </div>
+
+      <div id="resultCard" class="result-wrap hidden">
+        <div class="result-toolbar">
+          <span id="resultSummary" class="result-summary"></span>
+          <button id="sortBtn" class="btn-ghost">↓ 倒序</button>
+        </div>
+        <table class="result-table">
+          <thead>
+            <tr>
+              <th class="col-rank">排名</th>
+              <th>工作表</th>
+              <th id="valueHeader" class="col-value sortable">值</th>
+            </tr>
+          </thead>
+          <tbody id="resultBody"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <script src="vendor/xlsx.full.min.js"></script>
+  <script src="formula-rules.js?v=2"></script>
+  <script src="app.js?v=5"></script>
+</body>
+</html>

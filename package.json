@@ -1,0 +1,13 @@
+{
+  "name": "hulu-analytics",
+  "version": "1.0.0",
+  "private": true,
+  "description": "飞书多维表格数据分析",
+  "scripts": {
+    "start": "node server.js",
+    "convert": "node convert-formulas.js"
+  },
+  "devDependencies": {
+    "xlsx": "^0.18.5"
+  }
+}
