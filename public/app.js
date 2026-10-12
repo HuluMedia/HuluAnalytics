@@ -18,7 +18,8 @@ const fileInput = document.getElementById('fileInput');
 const fileInfo = document.getElementById('fileInfo');
 const messageEl = document.getElementById('message');
 const analysisCard = document.getElementById('analysisCard');
-const dateInput = document.getElementById('dateInput');
+const dateStartInput = document.getElementById('dateStart');
+const dateEndInput = document.getElementById('dateEnd');
 const columnSelect = document.getElementById('columnSelect');
 const devSelect = document.getElementById('devSelect');
 const queryBtn = document.getElementById('queryBtn');
@@ -282,15 +283,20 @@ function aggregateColumn(dateStr, colName, sheetDailyData) {
 /* ---------- 查询(纯本地) ---------- */
 
 function query() {
-  const date = dateInput.value;
+  const dateStart = dateStartInput.value;
+  const dateEnd = dateEndInput.value;
   const column = columnSelect.value;
-  const dev = devSelect.value;
-  if (!date) return showMessage('error', '请先选择日期');
+  const devFilter = devSelect.value;
+  if (!dateStart && !dateEnd) return showMessage('error', '请先选择日期');
   if (!column) return showMessage('error', '请先选择列名');
   hideMessage();
 
-  const devSet = dev === 'all' ? null : devProjects[dev];
-  const target = normalizeDate(date);
+  // 确定范围边界(只填一个时按单日处理)
+  const start = normalizeDate(dateStart || dateEnd);
+  const end = normalizeDate(dateEnd || dateStart);
+  if (start > end) return showMessage('error', '开始日期不能晚于结束日期');
+
+  const devSet = devFilter === 'all' ? null : devProjects[devFilter];
   const rows = [];
   for (const s of sheetData) {
     if (devSet && !devSet.has(s.name)) continue; // 开发者筛选
@@ -299,26 +305,29 @@ function query() {
       if (name === column) { colIdx = c; break; }
     }
     if (colIdx === -1) continue;
-    let matchRow = -1;
+    // 累加范围内所有行的该列数值
+    let sum = 0;
+    let hasValue = false;
     for (let r = 0; r < s.rows.length; r++) {
-      if (normalizeDate(s.rows[r]?.[s.dateCol]) === target) {
-        matchRow = r;
-        const v = s.rows[r]?.[colIdx];
-        if (v !== null && v !== undefined && v !== '') break;
+      const rowDate = normalizeDate(s.rows[r]?.[s.dateCol]);
+      if (!rowDate || rowDate < start || rowDate > end) continue;
+      const v = s.rows[r]?.[colIdx];
+      if (v !== null && v !== undefined && v !== '') {
+        const n = extractNumber(v);
+        if (n !== null) { sum += n; hasValue = true; }
       }
     }
-    if (matchRow === -1) continue;
-    const raw = s.rows[matchRow]?.[colIdx] ?? null;
+    if (!hasValue) continue;
     // 匹配所属开发者
-    let dev = '';
+    let devName = '';
     for (const d of ['jc', 'lky', 'yp']) {
-      if (devProjects[d]?.has(s.name)) { dev = d; break; }
+      if (devProjects[d]?.has(s.name)) { devName = d; break; }
     }
     rows.push({
       table: s.name,
-      value: raw === null || raw === '' ? null : raw,
-      number: extractNumber(raw),
-      dev: dev,
+      value: sum,
+      number: sum,
+      dev: devName,
     });
   }
 
@@ -431,7 +440,10 @@ valueHeader.addEventListener('click', toggleSort);
 columnSelect.addEventListener('keydown', (e) => {
   if (e.key === 'Enter') query();
 });
-dateInput.addEventListener('keydown', (e) => {
+dateStartInput.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') query();
+});
+dateEndInput.addEventListener('keydown', (e) => {
   if (e.key === 'Enter') query();
 });
 
@@ -439,5 +451,7 @@ dateInput.addEventListener('keydown', (e) => {
   const d = new Date();
   d.setDate(d.getDate() - 1); // 默认昨天
   const p = (x) => String(x).padStart(2, '0');
-  dateInput.value = `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+  const yesterday = `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+  dateStartInput.value = yesterday;
+  dateEndInput.value = yesterday;
 })();
