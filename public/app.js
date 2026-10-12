@@ -22,6 +22,7 @@ const dateStartInput = document.getElementById('dateStart');
 const dateEndInput = document.getElementById('dateEnd');
 const columnSelect = document.getElementById('columnSelect');
 const devSelect = document.getElementById('devSelect');
+const serverSelect = document.getElementById('serverSelect');
 const queryBtn = document.getElementById('queryBtn');
 const sortBtn = document.getElementById('sortBtn');
 const resultCard = document.getElementById('resultCard');
@@ -53,6 +54,24 @@ async function loadDevProjects() {
   }
 }
 loadDevProjects();
+
+/* ---------- 服务器编号加载 ---------- */
+let servers = [];
+
+async function loadServers() {
+  try {
+    const res = await fetch('service.json');
+    const data = await res.json();
+    servers = Array.isArray(data) ? data.map(String) : [];
+    // 填充服务器下拉选项
+    serverSelect.innerHTML =
+      '<option value="all">全部</option>' +
+      servers.map((s) => `<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`).join('');
+  } catch (e) {
+    servers = [];
+  }
+}
+loadServers();
 
 /* ---------- 文件上传与解析 ---------- */
 
@@ -287,6 +306,7 @@ function query() {
   const dateEnd = dateEndInput.value;
   const column = columnSelect.value;
   const devFilter = devSelect.value;
+  const serverFilter = serverSelect.value;
   if (!dateStart && !dateEnd) return showMessage('error', '请先选择日期');
   if (!column) return showMessage('error', '请先选择列名');
   hideMessage();
@@ -300,6 +320,11 @@ function query() {
   const rows = [];
   for (const s of sheetData) {
     if (devSet && !devSet.has(s.name)) continue; // 开发者筛选
+    // 服务器筛选: 项目名中4位数字的前两位 == 服务器编号
+    if (serverFilter !== 'all') {
+      const m = s.name.match(/\d{4}/);
+      if (!m || m[0].slice(0, 2) !== serverFilter) continue;
+    }
     let colIdx = -1;
     for (const [c, name] of s.colNames) {
       if (name === column) { colIdx = c; break; }
