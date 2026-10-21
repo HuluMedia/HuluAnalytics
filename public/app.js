@@ -23,6 +23,7 @@ const dateEndInput = document.getElementById('dateEnd');
 const columnSelect = document.getElementById('columnSelect');
 const devSelect = document.getElementById('devSelect');
 const serverSelect = document.getElementById('serverSelect');
+const productSelect = document.getElementById('productSelect');
 const queryBtn = document.getElementById('queryBtn');
 const sortBtn = document.getElementById('sortBtn');
 const resultCard = document.getElementById('resultCard');
@@ -44,9 +45,18 @@ async function loadDevProjects() {
   try {
     const res = await fetch('dev.json');
     const data = await res.json();
+    const productTypes = [];
     for (const dev of ['jc', 'lky', 'yp']) {
       devProjects[dev] = new Set(Array.isArray(data[dev]) ? data[dev] : []);
+      // 产品类型 = 项目编码开头的英文字母
+      for (const code of devProjects[dev]) {
+        const m = String(code).match(/^[A-Za-z]+/);
+        if (m && !productTypes.includes(m[0])) productTypes.push(m[0]);
+      }
     }
+    productSelect.innerHTML =
+      '<option value="all">全部</option>' +
+      productTypes.map((p) => `<option value="${escapeHtml(p)}">${escapeHtml(p)}</option>`).join('');
   } catch (e) {
     for (const dev of ['jc', 'lky', 'yp']) {
       devProjects[dev] = new Set();
@@ -307,6 +317,7 @@ function query() {
   const column = columnSelect.value;
   const devFilter = devSelect.value;
   const serverFilter = serverSelect.value;
+  const productFilter = productSelect.value;
   if (!dateStart && !dateEnd) return showMessage('error', '请先选择日期');
   if (!column) return showMessage('error', '请先选择列名');
   hideMessage();
@@ -324,6 +335,11 @@ function query() {
     if (serverFilter !== 'all') {
       const m = s.name.match(/\d{4}/);
       if (!m || m[0].slice(0, 2) !== serverFilter) continue;
+    }
+    // 产品类型筛选: 项目名开头的英文字母 == 所选产品类型
+    if (productFilter !== 'all') {
+      const m = String(s.name).match(/^[A-Za-z]+/);
+      if (!m || m[0].toLowerCase() !== productFilter.toLowerCase()) continue;
     }
     let colIdx = -1;
     for (const [c, name] of s.colNames) {
